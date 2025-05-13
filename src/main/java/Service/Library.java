@@ -5,8 +5,7 @@ import Exceptions.BookNotCheckedOutException;
 import Model.Book;
 import Model.User;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represents a library that contains books and registered users.
@@ -16,6 +15,7 @@ public class Library {
     private String name;
     private Set<Book> books;
     private Set<User> members;
+    private Map<Book, User> checkedOutBooks;
 
     /**
      * Constructs a new Library with the given name.
@@ -26,6 +26,7 @@ public class Library {
         this.name = name;
         this.books = new HashSet<>();
         this.members = new HashSet<>();
+        this.checkedOutBooks = new HashMap<>();
     }
 
     /**
@@ -41,6 +42,7 @@ public class Library {
         if (isCheckedOut) {
             user.removeBook(book);
             this.books.add(book);
+            checkedOutBooks.remove(book); // Remove tracking
         } else {
             throw new BookNotCheckedOutException("Book not checked out by User: " + user.getLastName() + ", " + user.getFirstName());
         }
@@ -59,9 +61,30 @@ public class Library {
         if (isAvailable) {
             user.addBook(book);
             this.books.remove(book);
+            checkedOutBooks.put(book, user); // Track who has it checked out
         } else {
             throw new BookNotAvailableException("Book is not available for checkout.");
         }
+    }
+
+    /**
+     * Returns all users who currently have a book checked out.
+     *
+     * @return - Set of users who have a book checked out.
+     */
+    public Set<User> getActiveBorrowers() {
+        return new HashSet<>(this.checkedOutBooks.values());
+    }
+
+    /**
+     * Check if a specific book is currently checked out (and by whom)
+     *
+     * @param book - the book to check for current borrower.
+     * @return - an {@code Optional<User>} containing the user who has the book checked out,
+     *           or an empty {@code Optional<User>} if the book is not currently checked out.
+     */
+    public Optional<User> getCurrentBorrower(Book book) {
+        return Optional.ofNullable(this.checkedOutBooks.get(book));
     }
 
     /**
@@ -104,5 +127,12 @@ public class Library {
      */
     public Set<User> getMembers() {
         return this.members;
+    }
+
+    /**
+     * Returns Map<Book, User> of checked out books.
+     */
+    public Map<Book, User> getCheckedOutBooks() {
+        return this.checkedOutBooks;
     }
 }
