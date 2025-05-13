@@ -11,7 +11,7 @@ public class BookTest {
 
     @BeforeEach
     public void setUp() {
-        lotr = new Book("123456890", "The Lord of the Rings", "J.R.R. Tolkien", 1954);
+        lotr = new Book("978-0-09-556397-5", "The Lord of the Rings", "J.R.R. Tolkien", 1954);
         mockingbird = new Book("978-0-06-112008-4", "To Kill a Mockingbird", "Harper Lee", 1960);
         gatsby = new Book("978-0-7432-7356-5", "The Great Gatsby", "F. Scott Fitzgerald", 1925);
     }
@@ -19,7 +19,7 @@ public class BookTest {
     @Test
     public void testConstructor() {
         // Test that the constructor correctly sets the properties
-        assertEquals("123456890", lotr.getIsbn());
+        assertEquals("978-0-09-556397-5", lotr.getIsbn());
         assertEquals("The Lord of the Rings", lotr.getTitle());
         assertEquals("J.R.R. Tolkien", lotr.getAuthor());
         assertEquals(1954, lotr.getPublishYear());
