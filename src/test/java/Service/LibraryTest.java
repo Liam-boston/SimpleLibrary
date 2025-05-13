@@ -7,6 +7,9 @@ import Model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LibraryTest {
@@ -69,6 +72,9 @@ public class LibraryTest {
 
             // confirm book is no longer in user collection
             assertFalse(mike.getBooks().contains(mockingbird));
+
+            // confirm book & user have been removed from Map of checkedOutBooks
+            assertNull(lib.getCheckedOutBooks().get(mockingbird));
         } catch (BookNotCheckedOutException ex) {
             fail("BookNotCheckedOutException should not have been thrown.");
         } catch (BookNotAvailableException ex) {
@@ -90,10 +96,61 @@ public class LibraryTest {
 
             // confirm book has been added to user collection
             assertTrue(john.getBooks().contains(gatsby));
+
+            // confirm book & user have been added to Map of checkedOutBooks
+            assertEquals(john, lib.getCheckedOutBooks().get(gatsby));
         } catch (BookNotAvailableException ex) {
             fail("BookNotAvailableException should not have been thrown.");
         }
+    }
 
+    @Test
+    public void testGetActiveBorrowers() {
+        try {
+            // check out books to users
+            lib.checkout(mockingbird, mike);
+            lib.checkout(lotr, john);
+            lib.checkout(gatsby, john);
+
+            // get active borrowers
+            Set<User> activeBorrowers = lib.getActiveBorrowers();
+
+            // confirm both users are in the set
+            assertTrue(activeBorrowers.contains(mike));
+            assertTrue(activeBorrowers.contains(john));
+
+            // confirm set size (no duplicates even if user has multiple books)
+            assertEquals(2, activeBorrowers.size());
+        } catch (BookNotAvailableException ex) {
+            fail("BookNotAvailableException should not have been thrown.");
+        }
+    }
+
+    @Test
+    public void testGetCurrentBorrower() {
+        try {
+            // check out a book
+            lib.checkout(lotr, mike);
+
+            // confirm Optional is present and correct
+            Optional<User> borrower = lib.getCurrentBorrower(lotr);
+            assertTrue(borrower.isPresent());
+            assertEquals(mike, borrower.get());
+
+            // return the book
+            lib.returnBook(lotr, mike);
+
+            // confirm the current borrower is no empty
+            assertEquals(Optional.empty(), lib.getCurrentBorrower(lotr));
+
+            // Check a book that hasn't been checked out
+            Optional<User> noBorrower = lib.getCurrentBorrower(mockingbird);
+            assertFalse(noBorrower.isPresent());
+        } catch (BookNotAvailableException ex) {
+            fail("BookNotAvailableException should not have been thrown.");
+        } catch (BookNotCheckedOutException ex) {
+            fail("BookNotCheckedOutException should not have been thrown.");
+        }
     }
 
     @Test
